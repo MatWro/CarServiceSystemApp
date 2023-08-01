@@ -12,6 +12,6 @@ public class CarDTO {
     private String gasType;
     private Long millage;
     private float engine_Capacity;
-
+    private Long user_id;
 
 }

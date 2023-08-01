@@ -1,8 +1,10 @@
 package CarServiceSystemApp.controllers;
 
 import CarServiceSystemApp.DTO.CarDTO;
+
 import CarServiceSystemApp.DTO.UserDTO;
 import CarServiceSystemApp.entities.Car;
+
 import CarServiceSystemApp.exceptions.UserNotFoundException;
 import CarServiceSystemApp.services.CarService;
 import CarServiceSystemApp.services.UserService;
@@ -39,10 +41,16 @@ public class CarController {
     }
 
     @PostMapping
-    public ResponseEntity<Car> addCar(@RequestBody Car car) {
-        Car savedCar = carService.saveCar(car);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedCar);
+    public ResponseEntity<CarDTO> addCar(@RequestBody CarDTO carDTO) {
+        try {
+            CarDTO registeredCarDTO = carService.addCarForUser(carDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(registeredCarDTO);
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {

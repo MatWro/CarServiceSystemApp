@@ -4,6 +4,8 @@ import CarServiceSystemApp.DTO.RepairmentDTO;
 import CarServiceSystemApp.entities.Car;
 import CarServiceSystemApp.entities.Repairment;
 import CarServiceSystemApp.exceptions.CarNotFoundException;
+import CarServiceSystemApp.exceptions.RepairmentNotFoundException;
+import CarServiceSystemApp.exceptions.UserNotFoundException;
 import CarServiceSystemApp.services.CarService;
 import CarServiceSystemApp.services.RepairmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/repairment")
@@ -26,13 +29,62 @@ public class RepairmentController {
         this.carService = carService;
     }
 
-    @PostMapping("/car/{carId}")
-    public ResponseEntity<RepairmentDTO> addRepairmentByCarId(@PathVariable Long carId, @RequestBody RepairmentDTO repairmentDTO) {
+    @GetMapping("/car/{carId}")
+    public ResponseEntity<List<RepairmentDTO>> getRepairmentsByCarId(@PathVariable Long carId) {
         try {
-            RepairmentDTO addedRepairmentDTO = repairmentService.addRepairmentForCar(carId, repairmentDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(addedRepairmentDTO);
+            List<RepairmentDTO> repairments = repairmentService.getRepairmentsByCarId(carId);
+            return ResponseEntity.ok(repairments);
         } catch (CarNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<RepairmentDTO>> getRepairmentsByUserId(@PathVariable Long userId) {
+        try {
+            List<RepairmentDTO> repairments = repairmentService.getRepairmentsByUserId(userId);
+            return ResponseEntity.ok(repairments);
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/{repairmentId}")
+    public ResponseEntity<RepairmentDTO> getRepairmentById(@PathVariable Long repairmentId) {
+        try {
+            RepairmentDTO repairmentDTO = repairmentService.getRepairmentById(repairmentId);
+            return ResponseEntity.ok(repairmentDTO);
+        } catch (RepairmentNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<RepairmentDTO> addRepairmentForCar(@RequestBody RepairmentDTO repairmentDTO) {
+        try {
+            RepairmentDTO addedRepairmentDTO = repairmentService.addRepairmentForCar(repairmentDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(addedRepairmentDTO);
+        } catch (CarNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @DeleteMapping("/{repairmentId}")
+    public ResponseEntity<Void> deleteRepairmentById(@PathVariable Long repairmentId) {
+        repairmentService.deleteRepairmentById(repairmentId);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @DeleteMapping("/car/{carId}")
+    public ResponseEntity<Void> deleteRepairmentsByCarId(@PathVariable Long carId) {
+        repairmentService.deleteRepairmentsByCarId(carId);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<Void> deleteRepairmentsByUserId(@PathVariable Long userId) {
+        repairmentService.deleteRepairmentsByUserId(userId);
+        return ResponseEntity.noContent().build();
     }
 }

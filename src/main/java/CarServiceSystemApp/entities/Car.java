@@ -5,11 +5,7 @@ import lombok.*;
 
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
+@Data
 @Entity
 @Table(name = "cars")
 public class Car {
@@ -32,12 +28,12 @@ public class Car {
     private float engine_Capacity;
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "fk_car_id", referencedColumnName = "id")
+    @JoinColumn(name = "car_id", referencedColumnName = "id")
     private List<Repairment> repairments;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    
+
 }

@@ -8,6 +8,7 @@ import CarServiceSystemApp.Repo.RepairmentRepository;
 import CarServiceSystemApp.Repo.UserRepository;
 import CarServiceSystemApp.entities.User;
 import CarServiceSystemApp.exceptions.UserLoginException;
+import CarServiceSystemApp.exceptions.UserNotFoundException;
 import CarServiceSystemApp.exceptions.UserRegistrationException;
 import CarServiceSystemApp.services.UserService;
 
@@ -46,7 +47,17 @@ public class UserController {
         return userRepository.findAll();
     }
 
-    @PostMapping("/register")
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id){
+        try{
+            UserDTO userDTO = userService.getUserById(id);
+            return ResponseEntity.ok(userDTO);
+        } catch (UserNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PostMapping
     public ResponseEntity<UserDTO> registerUser(@RequestBody UserDTO userDTO) {
         try {
             UserDTO registeredUser = userService.registerUser(userDTO);
