@@ -7,6 +7,7 @@ import lombok.*;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @Entity

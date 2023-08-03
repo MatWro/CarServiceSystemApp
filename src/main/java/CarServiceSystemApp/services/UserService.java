@@ -7,13 +7,12 @@ import CarServiceSystemApp.entities.User;
 import CarServiceSystemApp.exceptions.UserLoginException;
 import CarServiceSystemApp.exceptions.UserNotFoundException;
 import CarServiceSystemApp.exceptions.UserRegistrationException;
-
-import org.springframework.http.ResponseEntity;
+import CarServiceSystemApp.mappers.UserMapper;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+
 
 
 @Service
@@ -31,22 +30,11 @@ public class UserService {
         if(!existingUsers.isEmpty()) {
             throw new UserRegistrationException("User with this email already exists.");
         }
-        User newUser = new User();
-        newUser.setName(userDTO.getName());
-        newUser.setEmail(userDTO.getEmail());
+       User user = UserMapper.convertToUser(userDTO);
 
-        String hashedPassword = BCrypt.hashpw(userDTO.getPassword(), BCrypt.gensalt());
-        newUser.setPassword(hashedPassword);
+        User savedUser = userRepository.save(user);
 
-        User savedUser = userRepository.save(newUser);
-
-        UserDTO registeredUserDTO = new UserDTO();
-        registeredUserDTO.setId(savedUser.getId());
-        registeredUserDTO.setName(savedUser.getName());
-        registeredUserDTO.setEmail(savedUser.getEmail());
-        registeredUserDTO.setPassword(savedUser.getPassword());
-
-        return registeredUserDTO;
+        return UserMapper.convertToUserDTO(savedUser);
     }
     public UserDTO loginUser(String email, String password) throws UserLoginException {
         List<User> users = userRepository.findByEmail(email);
@@ -75,20 +63,16 @@ public class UserService {
         System.out.println("Hashed Password: " + hashedPassword);
         return BCrypt.checkpw(rawPassword, hashedPassword);
     }
-    public UserDTO getUserById(Long userId) throws UserNotFoundException {
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            throw new UserNotFoundException("User with ID " + userId + " not found.");
-        }
+    public UserDTO getUserDTOById(Long userId) throws UserNotFoundException {
 
-        User user = userOptional.get();
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setName(user.getName());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setPassword(user.getPassword());
+        User user = getUserById(userId);
 
-        return userDTO;
+        return UserMapper.convertToUserDTO(user);
+    }
+
+    public User getUserById(Long userId) throws UserNotFoundException {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found."));
     }
 
 }

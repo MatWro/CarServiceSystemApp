@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  mysqldb:
+    image: mysql:8-oracle
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=Kaktus123
+      - MYSQL_DATABASE=service_Data_Base
+      - MYSQL_USER=ServisMaster
+      - MYSQL_PASSWORD=Kaktus123
+    ports:
+      - "3306:3306"
+      - "33060:33060"
+  app:
+    depends_on:
+      - mysqldb
+    image: car-service
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    environment:
+      MYSQL_HOST: mysqldb
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: service_Data_Base
+      MYSQL_USER: ServisMaster
+      MYSQL_PASSWORD: Kaktus123
+    volumes:
+      - .m2:/root/.m2
+    stdin_open: true
+    tty: true

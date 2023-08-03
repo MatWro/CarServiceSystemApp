@@ -36,8 +36,12 @@ public class CarController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Car> getCarById(@PathVariable Long id) {
-        Car car = carService.getCarById(id);
-        return ResponseEntity.ok(car);
+       try {
+           Car car = carService.getCarById(id);
+           return ResponseEntity.ok(car);
+       }catch (UserNotFoundException e){
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+       }
     }
 
     @PostMapping
@@ -56,16 +60,6 @@ public class CarController {
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
         carService.deleteCar(id);
         return ResponseEntity.noContent().build();
-    }
-    @PostMapping("/user/{userId}")
-    public ResponseEntity<CarDTO> addCarForUser(@PathVariable Long userId, @RequestBody CarDTO carDTO) {
-        try {
-            UserDTO userDTO = userService.getUserById(userId);
-            CarDTO addedCarDTO = carService.addCarForUser(userDTO, carDTO);
-            return ResponseEntity.ok(addedCarDTO);
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
     }
     @GetMapping("/user/{id}")
     public ResponseEntity<List<CarDTO>> getCarsByUserId(@PathVariable Long id) {

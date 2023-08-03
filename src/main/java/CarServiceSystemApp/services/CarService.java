@@ -2,11 +2,12 @@ package CarServiceSystemApp.services;
 
 import CarServiceSystemApp.DTO.CarDTO;
 
-import CarServiceSystemApp.DTO.UserDTO;
+
 import CarServiceSystemApp.Repo.CarRepository;
 import CarServiceSystemApp.Repo.UserRepository;
 import CarServiceSystemApp.entities.Car;
 import CarServiceSystemApp.entities.User;
+import CarServiceSystemApp.mappers.CarMapper;
 
 import CarServiceSystemApp.exceptions.UserNotFoundException;
 
@@ -22,8 +23,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class CarService {
-    private CarRepository carRepository;
-    private UserRepository userRepository;
+
+
+    private final CarRepository carRepository;
+    private final UserRepository userRepository;
     @Autowired
     public CarService(CarRepository carRepository, UserRepository userRepository){
         this.carRepository = carRepository;
@@ -42,36 +45,7 @@ public class CarService {
     public void deleteCar(Long id) {
         carRepository.deleteById(id);
     }
-    public CarDTO addCarForUser(UserDTO userDTO, CarDTO carDTO) {
 
-        Car newCar = new Car();
-        newCar.setBrand(carDTO.getBrand());
-        newCar.setType(carDTO.getType());
-        newCar.setModel(carDTO.getModel());
-        newCar.setGasType(carDTO.getGasType());
-        newCar.setMillage(carDTO.getMillage());
-        newCar.setEngine_Capacity(carDTO.getEngine_Capacity());
-
-
-        User user = new User();
-        user.setId(userDTO.getId());
-        newCar.setUser(user);
-
-
-        Car savedCar = carRepository.save(newCar);
-
-
-        CarDTO addedCarDTO = new CarDTO();
-        addedCarDTO.setId(savedCar.getId());
-        addedCarDTO.setBrand(savedCar.getBrand());
-        addedCarDTO.setType(savedCar.getType());
-        addedCarDTO.setModel(savedCar.getModel());
-        addedCarDTO.setGasType(savedCar.getGasType());
-        addedCarDTO.setMillage(savedCar.getMillage());
-        addedCarDTO.setEngine_Capacity(savedCar.getEngine_Capacity());
-
-        return addedCarDTO;
-    }
 
     public List<CarDTO> getCarsByUserId(Long user_id) throws UserNotFoundException {
         List<Car> cars = carRepository.findByUser_Id(user_id);
@@ -80,50 +54,20 @@ public class CarService {
         }
 
 
-        List<CarDTO> carDTOs = cars.stream()
-                .map(this::convertToCarDTO)
+        return cars.stream()
+                .map(CarMapper::convertToCarDTO)
                 .collect(Collectors.toList());
-
-        return carDTOs;
     }
 
     public CarDTO addCarForUser(CarDTO carDTO) throws UserNotFoundException {
         User user = userRepository.findById(carDTO.getUser_id())
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + carDTO.getUser_id() + " not found."));
 
-        Car newCar = new Car();
-        newCar.setBrand(carDTO.getBrand());
-        newCar.setType(carDTO.getType());
-        newCar.setModel(carDTO.getModel());
-        newCar.setGasType(carDTO.getGasType());
-        newCar.setMillage(carDTO.getMillage());
-        newCar.setEngine_Capacity(carDTO.getEngine_Capacity());
-        newCar.setUser(user);
+        Car car = CarMapper.convertToCar(carDTO, user);
 
-        Car savedCar = carRepository.save(newCar);
+        Car savedCar = carRepository.save(car);
 
-        CarDTO registeredCarDTO = new CarDTO();
-        registeredCarDTO.setId(savedCar.getId());
-        registeredCarDTO.setBrand(savedCar.getBrand());
-        registeredCarDTO.setType(savedCar.getType());
-        registeredCarDTO.setModel(savedCar.getModel());
-        registeredCarDTO.setGasType(savedCar.getGasType());
-        registeredCarDTO.setMillage(savedCar.getMillage());
-        registeredCarDTO.setEngine_Capacity(savedCar.getEngine_Capacity());
-        registeredCarDTO.setUser_id(savedCar.getUser().getId());
-
-        return registeredCarDTO;
+        return CarMapper.convertToCarDTO(savedCar);
     }
-    private CarDTO convertToCarDTO(Car car) {
-        CarDTO carDTO = new CarDTO();
-        carDTO.setId(car.getId());
-        carDTO.setBrand(car.getBrand());
-        carDTO.setType(car.getType());
-        carDTO.setModel(car.getModel());
-        carDTO.setGasType(car.getGasType());
-        carDTO.setMillage(car.getMillage());
-        carDTO.setEngine_Capacity(car.getEngine_Capacity());
 
-        return carDTO;
-    }
 }
