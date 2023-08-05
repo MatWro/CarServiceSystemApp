@@ -19,13 +19,11 @@ import java.util.List;
 @RequestMapping("/cars")
 public class CarController {
     private final CarService carService;
-    private final UserService userService;
 
 
     @Autowired
-    public CarController(CarService carService, UserService userService) {
+    public CarController(CarService carService) {
         this.carService = carService;
-        this.userService = userService;
     }
 
     @GetMapping
